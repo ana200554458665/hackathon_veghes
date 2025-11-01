@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -42,9 +41,3 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
-=======
-.DS_Store
-**/node_modules/
-**/dist/
-**/.env
->>>>>>> a5edc6d3fe74c07ca0f79eaf4fca1cac009cbb6c

@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////////////////
+// 🔐 Modelele BetterAuth (nu le modifici)
+//////////////////////////////////////////////////////////////
+
+model User {
+  id             String   @id @default(cuid())
+  name           String?
+  email          String   @unique
+  password       String?
+  emailVerified  Boolean? @default(false)
+  image          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // 🔹 Relații
+  sessions       Session[]
+  accounts       Account[]
+
+  // 🔹 Relații custom (din app)
+  posts          Post[]
+  likes          Like[]
+  profile        UserProfile?
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+//////////////////////////////////////////////////////////////
+// 🧾 PROFIL USER (detalii extra)
+//////////////////////////////////////////////////////////////
+
+model UserProfile {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id])
+  company      String?
+  position     String?
+  departament  String?
+  bio          String?
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("user_profile")
+}
+
+//////////////////////////////////////////////////////////////
+// 📝 POSTĂRI
+//////////////////////////////////////////////////////////////
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  content     String?
+  imageUrl    String?   
+  publicId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 🔹 Relații
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes       Like[]
+
+  @@map("post")
+}
+
+//////////////////////////////////////////////////////////////
+// ❤️ LIKE-URI
+//////////////////////////////////////////////////////////////
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("like")
+}
