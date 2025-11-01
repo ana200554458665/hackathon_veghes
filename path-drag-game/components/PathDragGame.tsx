@@ -1,10 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type Pt = { x: number; y: number };
 
-// —————— Geometrie utilitară ——————
+// ---------- Geometrie utilitară ----------
 function pointToSegmentDistance(p: Pt, a: Pt, b: Pt) {
   const vx = b.x - a.x, vy = b.y - a.y;
   const wx = p.x - a.x, wy = p.y - a.y;
@@ -31,12 +37,12 @@ function progressOnPolyline(p: Pt, pts: Pt[]) {
   }
   const segLen = cum[best.segIndex + 1] - cum[best.segIndex];
   const traveled = cum[best.segIndex] + best.t * segLen;
-  return { ratio: total ? traveled / total : 0, dist: best.dist };
+  return { ratio: total ? traveled / total : 0, dist: (best as any).dist as number };
 }
 
-// —————— Set de 12 pattern-uri scalabile (w,h) → Pt[] ——————
+// ---------- Pattern-uri ----------
 type PatternGen = (w: number, h: number) => Pt[];
-const m = 40; // margine
+const m = 40;
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 const serpentine: PatternGen = (w, h) => [
@@ -159,7 +165,7 @@ const PATTERNS: PatternGen[] = [
   steps, diagonalS, tightTurns, sawtooth, lowWave, canyon,
 ];
 
-// —————— Componentă ——————
+// ---------- Componentă ----------
 export default function PathDragGame() {
   const width = 900;
   const height = 360;
@@ -171,11 +177,11 @@ export default function PathDragGame() {
   const [patternIndex, setPatternIndex] = useState<number>(0);
 
   const [pos, setPos] = useState<Pt>(pathPts[0]);
-  const [dragging, setDragging] = useState(false);
-  const [started, setStarted] = useState(false);
-  const [won, setWon] = useState(false);
-  const [lost, setLost] = useState(false);
-  const [bestProgress, setBestProgress] = useState(0);
+  const [dragging, setDragging] = useState<boolean>(false);
+  const [started, setStarted] = useState<boolean>(false);
+  const [won, setWon] = useState<boolean>(false);
+  const [lost, setLost] = useState<boolean>(false);
+  const [bestProgress, setBestProgress] = useState<number>(0);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -184,7 +190,6 @@ export default function PathDragGame() {
     [pathPts]
   );
 
-  // alege aleator un pattern nou și resetează jocul
   const pickRandomPattern = useCallback(() => {
     const idx = Math.floor(Math.random() * PATTERNS.length);
     const pts = PATTERNS[idx](width, height);
@@ -198,12 +203,10 @@ export default function PathDragGame() {
     setBestProgress(0);
   }, []);
 
-  // inițializează la intrarea pe pagină
   useEffect(() => {
     pickRandomPattern();
   }, [pickRandomPattern]);
 
-  // coordonate pointer client -> coordonate în viewBox SVG
   const clientToSvgPoint = useCallback((clientX: number, clientY: number): Pt => {
     const svg = svgRef.current!;
     const rect = svg.getBoundingClientRect();
@@ -227,7 +230,7 @@ export default function PathDragGame() {
         return;
       }
 
-      setBestProgress((prev) => (ratio > prev ? ratio : prev));
+      setBestProgress((prev: number) => (ratio > prev ? ratio : prev));
       if (ratio > 0.995) {
         setWon(true);
         setDragging(false);
@@ -291,17 +294,15 @@ export default function PathDragGame() {
           className="w-full h-[360px] touch-none block"
           onPointerDown={onPointerDown}
         >
-          {/* zona permisă vizual */}
           <polyline
             points={polyPoints}
             fill="none"
             stroke="#2a2f6c"
             strokeOpacity={0.35}
-            strokeWidth={18 + 16 * 2}  // strokeWidth + tolerance*2
+            strokeWidth={18 + 16 * 2}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {/* traseu principal */}
           <polyline
             points={polyPoints}
             fill="none"
@@ -310,7 +311,6 @@ export default function PathDragGame() {
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          {/* start / finish */}
           <circle cx={pathPts[0]?.x ?? m} cy={pathPts[0]?.y ?? height / 2} r={10} fill="#22c55e" />
           <rect
             x={(pathPts[pathPts.length - 1]?.x ?? width - m) - 14}
@@ -320,7 +320,6 @@ export default function PathDragGame() {
             rx={6}
             fill="#eab308"
           />
-          {/* handler */}
           <circle
             cx={pos.x}
             cy={pos.y}
@@ -340,8 +339,7 @@ export default function PathDragGame() {
         )}
         {lost && (
           <span className="text-red-300">
-            Ai ieșit din traseu. Apasă <strong>Reset (Random)</strong> și încearcă din
-            nou.
+            Ai ieșit din traseu. Apasă <strong>Reset (Random)</strong> și încearcă din nou.
           </span>
         )}
         {won && <span className="text-green-300">🎉 Gata! Ai reușit!</span>}
