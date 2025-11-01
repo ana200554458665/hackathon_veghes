@@ -6,7 +6,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get("/", (_req: Request, res: Response) => {
-  res.send("Salut din backend TypeScript! 🚀");
+  res.send("Heii din backend TypeScript! ");
 });
 
 app.listen(port, () => {
