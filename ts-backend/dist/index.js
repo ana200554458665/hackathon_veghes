@@ -8,7 +8,7 @@ const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
 app.use(express_1.default.json());
 app.get("/", (_req, res) => {
-    res.send("Salut din backend TypeScript! 🚀");
+    res.send("Heii din backend TypeScript! ");
 });
 app.listen(port, () => {
     console.log(`Server pornit pe http://localhost:${port}`);
